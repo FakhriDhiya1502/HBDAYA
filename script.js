@@ -292,9 +292,11 @@ const galleryDots = document.getElementById("galleryDots");
 const gallerySection = document.querySelector(".gallery-section");
 
 // pecah "namafile.jpg | caption" jadi {url, caption}
+// kalau isinya Base64 (data:image...), pakai langsung tanpa prefix folder
 function parseFoto(baris) {
   const [nama, caption] = baris.split("|").map((s) => s.trim());
-  return { url: "foto/" + nama, caption: caption || "" };
+  const url = nama.startsWith("data:") ? nama : "foto/" + nama;
+  return { url, caption: caption || "" };
 }
 
 function renderGallery() {
