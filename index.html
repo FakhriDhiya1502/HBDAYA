@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Cegah auto-zoom & bikin app-like di iPhone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#FF85A1" />
+  <title>Wishlist Ulang Tahun Aya 🎂</title>
+
+  <!-- Google Fonts: Quicksand (rounded & friendly) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Confetti (CDN ringan) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- 🎵 Musik pembuka (sumber diisi otomatis dari folder music/) -->
+  <audio id="bgMusic" loop preload="auto"></audio>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== BALON & HATI MELAYANG (background) ===== -->
+  <div class="floaties" id="floaties" aria-hidden="true"></div>
+
+  <!-- ===== WELCOME SCREEN (amplop) ===== -->
+  <section class="welcome" id="welcome">
+    <div class="envelope" id="envelope">
+      <div class="envelope__flap"></div>
+      <div class="envelope__body">💌</div>
+      <div class="envelope__seal">🎀</div>
+    </div>
+    <h1 class="welcome__title">Ada kejutan buat Aya 🎁</h1>
+    <p class="welcome__hint">Tap amplopnya buat buka ya~</p>
+  </section>
+
+  <!-- ===== KONTEN UTAMA (disembunyikan sampai amplop dibuka) ===== -->
+  <div class="app app--hidden" id="app">
+
+    <!-- ===== HEADER (sticky + glassmorphism) ===== -->
+    <header class="header">
+      <div class="header__row">
+        <div>
+          <h1 class="header__title">Selamat Ulang Tahun, Aya! 🎈</h1>
+          <p class="header__subtitle">Pilih kado yang kamu mau hari ini~</p>
+        </div>
+        <!-- 🎵 Tombol musik on/off -->
+        <button type="button" class="music-btn" id="musicBtn" aria-label="Putar/matikan musik">🎵</button>
+      </div>
+    </header>
+
+    <!-- ===== KUE TIUP LILIN (interaktif) ===== -->
+    <section class="cake-section" id="cakeSection">
+      <p class="cake__hint" id="cakeHint">Tiup lilinnya, yuk! Make a wish 🌟</p>
+      <div class="cake" id="cake">
+        <div class="cake__flames" id="cakeFlames">
+          <span class="flame"></span>
+          <span class="flame"></span>
+          <span class="flame"></span>
+        </div>
+        <div class="cake__candles">
+          <span class="candle"></span>
+          <span class="candle"></span>
+          <span class="candle"></span>
+        </div>
+        <div class="cake__top"></div>
+        <div class="cake__layer cake__layer--1"></div>
+        <div class="cake__layer cake__layer--2"></div>
+      </div>
+    </section>
+
+    <!-- ===== COUNTDOWN ===== -->
+    <section class="countdown" id="countdown">
+      <p class="countdown__label">🎂 Menuju hari spesialmu</p>
+      <div class="countdown__timer" id="countdownTimer">
+        <div class="countdown__unit"><span id="cd-days">--</span><small>Hari</small></div>
+        <div class="countdown__unit"><span id="cd-hours">--</span><small>Jam</small></div>
+        <div class="countdown__unit"><span id="cd-mins">--</span><small>Menit</small></div>
+        <div class="countdown__unit"><span id="cd-secs">--</span><small>Detik</small></div>
+      </div>
+    </section>
+
+    <!-- ===== SURAT PEMBUKA (diketik otomatis oleh JS) ===== -->
+    <section class="letter">
+      <p class="letter__text" id="letterText"></p>
+      <span class="letter__cursor" id="letterCursor">|</span>
+    </section>
+
+    <!-- ===== GALERI FOTO BERDUA ===== -->
+    <section class="gallery-section">
+      <h2 class="section-title">📸 Momen Kita</h2>
+      <div class="gallery" id="gallery">
+        <!-- slide di-render oleh JS dari daftar foto -->
+      </div>
+      <div class="gallery__dots" id="galleryDots"></div>
+    </section>
+
+    <!-- ===== CATEGORY FILTER (horizontal scroll pills) ===== -->
+    <nav class="filters" id="filters" aria-label="Kategori kado">
+      <button class="pill pill--active" data-category="all">✨ Semua</button>
+      <button class="pill" data-category="Makanan">🍽️ Makanan</button>
+      <button class="pill" data-category="Jalan-jalan">🎬 Jalan-jalan</button>
+      <button class="pill" data-category="Kado Fisik">🎁 Kado Fisik</button>
+      <button class="pill" data-category="Quality Time">🫂 Quality Time</button>
+    </nav>
+
+    <!-- ===== CATALOG (cards di-render oleh JS) ===== -->
+    <main class="catalog" id="catalog"></main>
+
+    <!-- ===== FLOATING CHECKOUT BUTTON ===== -->
+    <button type="button" class="checkout-btn" id="checkoutBtn" disabled>
+      Kabulkan Permintaanku! ✨
+    </button>
+
+    <!-- ===== ⏳ TIMELINE PERJALANAN KITA ===== -->
+    <section class="block block--timeline">
+      <h2 class="section-title">⏳ Perjalanan Kita</h2>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- ===== 🎡 SPIN THE WHEEL (ide kencan random) ===== -->
+    <section class="block">
+      <h2 class="section-title">🎡 Bingung Mau Ngapain? Puter Aja!</h2>
+      <div class="wheel-wrap">
+        <div class="wheel-pointer">▼</div>
+        <canvas id="wheel" width="280" height="280"></canvas>
+      </div>
+      <button type="button" class="block-btn" id="spinBtn">Putar Roda! 🎯</button>
+      <p class="wheel-result" id="wheelResult"></p>
+    </section>
+
+    <!-- ===== 🎟️ KUPON DIGITAL ===== -->
+    <section class="block">
+      <h2 class="section-title">🎟️ Kupon Spesial Buat Aya</h2>
+      <p class="block-sub">Tap kupon buat "robek" & pakai~ (berlaku selamanya 😆)</p>
+      <div class="coupons" id="coupons"></div>
+    </section>
+
+    <!-- ===== ❓ KUIS PASANGAN ===== -->
+    <section class="block">
+      <h2 class="section-title">❓ Seberapa Kenal Kamu Sama Fakhri?</h2>
+      <div class="quiz" id="quiz"></div>
+      <p class="quiz-score" id="quizScore"></p>
+    </section>
+
+    <!-- ===== 💌 BALASAN DARI AYA ===== -->
+    <section class="block">
+      <h2 class="section-title">💌 Ada Pesan Buat Fakhri?</h2>
+      <p class="block-sub">Tulis apa aja di sini ya, langsung sampai ke aku 🥰</p>
+      <textarea id="replyText" class="reply-input" rows="3" placeholder="Tulis pesanmu di sini..."></textarea>
+      <button type="button" class="block-btn" id="replyBtn">Kirim Pesan 💕</button>
+      <p class="reply-status" id="replyStatus"></p>
+    </section>
+
+    <!-- ===== PESAN RAHASIA DI AKHIR ===== -->
+    <section class="secret" id="secret">
+      <div class="secret__heart">💝</div>
+      <p class="secret__text">
+        Psst… kamu nemu pesan rahasianya! 🤫<br /><br />
+        Makasih ya udah jadi bagian paling bahagia di hari-hariku.
+        Apa pun yang kamu pilih di atas, yang paling aku mau cuma satu:
+        bikin kamu tersenyum hari ini dan seterusnya.
+        <br /><br />
+        Selamat ulang tahun, Aya. Aku sayang kamu. 💗
+      </p>
+    </section>
+  </div>
+
+  <!-- ===== SUCCESS MODAL ===== -->
+  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal__icon">🐻💖</div>
+      <h2 class="modal__title">Yeay!</h2>
+      <p class="modal__text">
+        Permintaanmu udah masuk ke sistem Fakhri.<br />Tungguin kejutannya ya! 💖
+      </p>
+      <button type="button" class="modal__close" id="modalClose">Tutup</button>
+    </div>
+  </div>
+
+  <script src="daftar.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
